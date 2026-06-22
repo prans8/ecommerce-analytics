@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 from database.mongo_client import get_mongo_db
 from database.postgres_client import get_postgres_connection
 import pickle
@@ -31,6 +32,9 @@ def get_top_categories():
 def get_monthly_trend():
     db = get_mongo_db()
     trend = list(db['monthly_trend'].find({}, {'_id': 0}))
+    # Rename field to match frontend expectation
+    for item in trend:
+        item['total_revenue'] = item.pop('payment_value')
     return trend
 
 @router.get("/analytics/customer-stats")
@@ -44,19 +48,30 @@ def get_customer_stats():
     return [{"id": r[0], "customer_id": r[1], "order_count": r[2], 
              "avg_spend": r[3], "churned": r[4]} for r in rows]
 
+
+class ChurnRequest(BaseModel):
+    order_count: int
+    avg_spend: float
+
+class RevenueRequest(BaseModel):
+    month_number: int
+
 @router.post("/predict/churn")
-def predict_churn(order_count: int, avg_spend: float):
-    prediction = churn_model.predict([[order_count, avg_spend]])[0]
-    probability = churn_model.predict_proba([[order_count, avg_spend]])[0][1]
+def predict_churn(request: ChurnRequest):
+    prediction = churn_model.predict([[request.order_count, request.avg_spend]])[0]
+    probability = churn_model.predict_proba([[request.order_count, request.avg_spend]])[0][1]
     return {
         "churned": bool(prediction),
         "churn_probability": round(float(probability), 2)
     }
 
 @router.post("/predict/revenue")
-def predict_revenue(month_number: int):
-    prediction = revenue_model.predict([[month_number]])[0]
+def predict_revenue(request: RevenueRequest):
+    prediction = revenue_model.predict([[request.month_number]])[0]
     return {"predicted_revenue": round(float(prediction), 2)}
+
+
+
 
 
 

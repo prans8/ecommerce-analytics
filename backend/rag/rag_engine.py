@@ -42,10 +42,10 @@ def get_business_context():
 
 def ask_question(question: str) -> str:
     """Ask a question about the business data"""
-   llm = ChatGroq(
-    api_key=os.getenv("GROQ_API_KEY"),
-    model_name="llama-3.3-70b-versatile"
-)
+    llm = ChatGroq(
+        api_key=os.getenv("GROQ_API_KEY"),
+        model_name="llama-3.3-70b-versatile"
+    )
     
     context = get_business_context()
     
