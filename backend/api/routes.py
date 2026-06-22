@@ -57,3 +57,17 @@ def predict_churn(order_count: int, avg_spend: float):
 def predict_revenue(month_number: int):
     prediction = revenue_model.predict([[month_number]])[0]
     return {"predicted_revenue": round(float(prediction), 2)}
+
+
+
+
+from rag.rag_engine import ask_question
+from pydantic import BaseModel
+
+class ChatRequest(BaseModel):
+    question: str
+
+@router.post("/chat")
+def chat(request: ChatRequest):
+    answer = ask_question(request.question)
+    return {"question": request.question, "answer": answer}
