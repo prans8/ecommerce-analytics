@@ -1,0 +1,14 @@
+# Environment variables
+backend/.env
+
+# Python
+__pycache__/
+*.pkl
+venv/
+*.pyc
+
+# Data files (too large for GitHub)
+backend/data/
+
+# VS Code
+.vscode/
