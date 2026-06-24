@@ -3,7 +3,7 @@ backend/.env
 
 # Python
 __pycache__/
-*.pkl
+# *.pkl
 venv/
 *.pyc
 
