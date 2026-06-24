@@ -4,6 +4,7 @@ from database.mongo_client import get_mongo_db
 from database.postgres_client import get_postgres_connection
 import pickle
 import os
+import math
 
 router = APIRouter()
 
@@ -32,7 +33,6 @@ def get_top_categories():
 def get_monthly_trend():
     db = get_mongo_db()
     trend = list(db['monthly_trend'].find({}, {'_id': 0}))
-    # Rename field to match frontend expectation
     for item in trend:
         item['total_revenue'] = item.pop('payment_value')
     return trend
@@ -45,9 +45,35 @@ def get_customer_stats():
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-    return [{"id": r[0], "customer_id": r[1], "order_count": r[2], 
+    return [{"id": r[0], "customer_id": r[1], "order_count": r[2],
              "avg_spend": r[3], "churned": r[4]} for r in rows]
 
+@router.get("/analytics/orders")
+def get_orders():
+    db = get_mongo_db()
+    orders = list(db['raw_orders'].find({}, {'_id': 0}).limit(500))
+
+    def clean_record(record):
+        return {
+            k: (None if isinstance(v, float) and math.isnan(v) else v)
+            for k, v in record.items()
+        }
+
+    cleaned = [clean_record(o) for o in orders]
+
+    result = []
+    for o in cleaned:
+        result.append({
+            "order_id": o.get("order_id", ""),
+            "customer_city": o.get("customer_city", ""),
+            "customer_state": o.get("customer_state", ""),
+            "category": o.get("product_category_name_english", "N/A"),
+            "payment_value": o.get("payment_value", 0),
+            "review_score": o.get("review_score", 0),
+            "delivery_days": o.get("delivery_days", 0)
+        })
+
+    return result
 
 class ChurnRequest(BaseModel):
     order_count: int
@@ -70,14 +96,7 @@ def predict_revenue(request: RevenueRequest):
     prediction = revenue_model.predict([[request.month_number]])[0]
     return {"predicted_revenue": round(float(prediction), 2)}
 
-
-
-
-
-
-
 from rag.rag_engine import ask_question
-from pydantic import BaseModel
 
 class ChatRequest(BaseModel):
     question: str
