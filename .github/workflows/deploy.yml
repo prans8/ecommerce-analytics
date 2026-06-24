@@ -10,10 +10,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
@@ -23,10 +23,10 @@ jobs:
     - name: Test API imports
       run: |
         cd backend
-        python -c "from main import app; print('✅ App imports successfully')"
+        python -c "from main import app; print('App imports successfully')"
 
     - name: Build Docker image
       run: docker build -t ecommerce-analytics .
 
     - name: Success
-      run: echo "✅ CI/CD Pipeline completed successfully!"
+      run: echo "CI/CD Pipeline completed successfully!"
