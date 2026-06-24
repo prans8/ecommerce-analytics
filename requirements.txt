@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pandas
+numpy
+scikit-learn
+pymongo
+psycopg2-binary
+langchain
+langchain-groq
+langchain-core
+python-dotenv
