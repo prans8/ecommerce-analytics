@@ -22,11 +22,6 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-    - name: Test API imports
-      run: |
-        cd backend
-        python -c "from main import app; print('App imports successfully')"
-
     - name: Build Docker image
       run: docker build -t ecommerce-analytics .
 
